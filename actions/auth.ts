@@ -49,7 +49,7 @@ export async function signup(
   }
 
   revalidatePath("/", "layout");
-  redirect("/");
+  return { success: true };
 }
 
 export async function login(formData: FormData) {

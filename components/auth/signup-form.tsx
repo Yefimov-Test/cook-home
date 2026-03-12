@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useState, useEffect } from "react";
+import { useState, useEffect, useTransition } from "react";
 import { signup } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
 interface City {
@@ -23,6 +24,9 @@ export function SignupForm({ cities }: { cities: City[] }) {
   const [cityId, setCityId] = useState("");
   const [districtId, setDistrictId] = useState("");
   const [districts, setDistricts] = useState<District[]>([]);
+  const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   useEffect(() => {
     if (!cityId) {
@@ -43,13 +47,27 @@ export function SignupForm({ cities }: { cities: City[] }) {
       });
   }, [cityId]);
 
-  const [state, formAction, pending] = useActionState(signup, null);
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError("");
+
+    const formData = new FormData(e.currentTarget);
+
+    startTransition(async () => {
+      const result = await signup(null, formData);
+      if (result?.error) {
+        setError(result.error);
+      } else {
+        router.push("/");
+      }
+    });
+  }
 
   return (
-    <form action={formAction} className="space-y-4">
-      {state?.error && (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      {error && (
         <div className="rounded-lg bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {state.error}
+          {error}
         </div>
       )}
 
@@ -107,8 +125,8 @@ export function SignupForm({ cities }: { cities: City[] }) {
         </select>
       </div>
 
-      <Button type="submit" className="w-full" disabled={pending}>
-        {pending ? "Регистрация..." : "Создать аккаунт"}
+      <Button type="submit" className="w-full" disabled={isPending}>
+        {isPending ? "Регистрация..." : "Создать аккаунт"}
       </Button>
 
       <p className="text-center text-sm text-muted-foreground">
