@@ -32,25 +32,30 @@ export function CookProfileForm({ profile, cookProfile, isNew }: Props) {
     );
   }
 
-  async function handleSubmit(formData: FormData) {
-    // Remove any existing cuisine_type entries and add selected ones
+  const [saving, setSaving] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
     selectedCuisines.forEach((c) => formData.append("cuisine_type", c));
 
     const action = isNew ? createCookProfile : updateCookProfile;
     const result = await action(formData);
+    setSaving(false);
 
     if (result?.error) {
       toast.error(result.error);
     } else {
-      toast.success(isNew ? "Профиль создан! Ожидайте модерации." : "Профиль обновлён");
-      if (isNew) router.push("/dashboard");
+      toast.success(isNew ? "Профиль создан!" : "Профиль обновлён");
+      if (isNew) router.push("/cook/dashboard");
     }
   }
 
   return (
     <Card>
       <CardContent className="p-6">
-        <form action={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="full_name">Имя</Label>
@@ -111,8 +116,8 @@ export function CookProfileForm({ profile, cookProfile, isNew }: Props) {
             </div>
           </div>
 
-          <Button type="submit" className="w-full">
-            {isNew ? "Создать профиль" : "Сохранить"}
+          <Button type="submit" className="w-full" disabled={saving}>
+            {saving ? "Сохранение..." : isNew ? "Создать профиль" : "Сохранить"}
           </Button>
         </form>
       </CardContent>

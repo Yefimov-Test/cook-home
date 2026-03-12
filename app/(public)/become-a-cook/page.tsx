@@ -9,8 +9,45 @@ import {
   ClipboardList,
   ShoppingBag,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
-export default function BecomeACookPage() {
+export default async function BecomeACookPage() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  let role: string | null = null;
+  if (user) {
+    const { data } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+    role = data?.role ?? null;
+  }
+
+  // Determine CTA based on auth state and role
+  const ctaHref =
+    role === "cook"
+      ? "/cook/dashboard"
+      : user
+        ? "/settings"
+        : "/signup";
+
+  const ctaLabel =
+    role === "cook"
+      ? "Перейти в панель повара"
+      : user
+        ? "Переключиться на повара"
+        : "Зарегистрироваться";
+
+  const ctaBottomLabel =
+    role === "cook"
+      ? "Открыть панель повара"
+      : user
+        ? "Стать поваром"
+        : "Стать поваром";
   return (
     <div>
       {/* Hero */}
@@ -26,8 +63,8 @@ export default function BecomeACookPage() {
             Зарегистрируйтесь как повар, создайте меню и принимайте заказы от
             людей рядом с вами.
           </p>
-          <Button size="lg" render={<Link href="/signup" />}>
-            Зарегистрироваться
+          <Button size="lg" render={<Link href={ctaHref} />}>
+            {ctaLabel}
           </Button>
         </div>
       </section>
@@ -118,8 +155,8 @@ export default function BecomeACookPage() {
             Регистрация занимает пару минут. Начните зарабатывать на том, что
             любите.
           </p>
-          <Button size="lg" render={<Link href="/signup" />}>
-            Стать поваром
+          <Button size="lg" render={<Link href={ctaHref} />}>
+            {ctaBottomLabel}
           </Button>
         </div>
       </section>

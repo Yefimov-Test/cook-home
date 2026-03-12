@@ -45,12 +45,14 @@ export async function createCookProfile(formData: FormData) {
     .eq("id", user.id);
 
   // Create cook profile
+  // TODO: remove auto-approve, use admin moderation
   const { error } = await supabase.from("cook_profiles").insert({
     id: user.id,
     slug,
     cuisine_type: parsed.data.cuisine_type,
     description: parsed.data.description,
     pickup_address: parsed.data.pickup_address,
+    is_approved: true,
   });
 
   if (error) return { error: error.message };

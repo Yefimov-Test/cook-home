@@ -6,12 +6,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Eye, EyeOff } from "lucide-react";
 import { createDish, deleteDish, toggleDishAvailability } from "@/actions/cook";
 import { DISH_CATEGORIES } from "@/lib/constants";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 interface Dish {
   id: string;
@@ -24,29 +24,37 @@ interface Dish {
 
 export function DishList({ dishes: initialDishes }: { dishes: Dish[] }) {
   const [showForm, setShowForm] = useState(false);
-  const [category, setCategory] = useState("");
+  const [saving, setSaving] = useState(false);
+  const router = useRouter();
 
-  async function handleCreate(formData: FormData) {
-    formData.set("category", category);
+  async function handleCreate(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setSaving(true);
+    const formData = new FormData(e.currentTarget);
     const result = await createDish(formData);
+    setSaving(false);
     if (result?.error) {
       toast.error(result.error);
     } else {
       toast.success("Блюдо добавлено");
       setShowForm(false);
-      setCategory("");
+      router.refresh();
     }
   }
 
   async function handleDelete(id: string) {
     const result = await deleteDish(id);
     if (result?.error) toast.error(result.error);
-    else toast.success("Блюдо удалено");
+    else {
+      toast.success("Блюдо удалено");
+      router.refresh();
+    }
   }
 
   async function handleToggle(id: string, current: boolean) {
     const result = await toggleDishAvailability(id, !current);
     if (result?.error) toast.error(result.error);
+    else router.refresh();
   }
 
   return (
@@ -60,7 +68,7 @@ export function DishList({ dishes: initialDishes }: { dishes: Dish[] }) {
       {showForm && (
         <Card className="mb-6">
           <CardContent className="p-4">
-            <form action={handleCreate} className="space-y-3">
+            <form onSubmit={handleCreate} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <Label htmlFor="name">Название</Label>
@@ -76,21 +84,22 @@ export function DishList({ dishes: initialDishes }: { dishes: Dish[] }) {
                 <Textarea id="description" name="description" rows={2} />
               </div>
               <div>
-                <Label>Категория</Label>
-                <input type="hidden" name="category" value={category} />
-                <Select value={category} onValueChange={(v) => setCategory(v ?? "")}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Выберите категорию" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {DISH_CATEGORIES.map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                <Label htmlFor="category">Категория</Label>
+                <select
+                  id="category"
+                  name="category"
+                  className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                >
+                  <option value="">Выберите категорию</option>
+                  {DISH_CATEGORIES.map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
               </div>
               <div className="flex gap-2">
-                <Button type="submit">Сохранить</Button>
+                <Button type="submit" disabled={saving}>
+                  {saving ? "Сохранение..." : "Сохранить"}
+                </Button>
                 <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>
                   Отмена
                 </Button>
@@ -123,14 +132,14 @@ export function DishList({ dishes: initialDishes }: { dishes: Dish[] }) {
                   <span className="font-semibold">{(dish.price / 100).toFixed(0)} ₽</span>
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     onClick={() => handleToggle(dish.id, dish.is_available)}
                   >
-                    {dish.is_available ? "👁" : "🚫"}
+                    {dish.is_available ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                   </Button>
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="sm"
                     onClick={() => handleDelete(dish.id)}
                   >
                     <Trash2 className="h-4 w-4" />

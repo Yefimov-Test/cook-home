@@ -15,7 +15,7 @@ export default async function CookDashboardPage() {
     .eq("id", user.id)
     .single();
 
-  if (!cookProfile) redirect("/profile");
+  if (!cookProfile) redirect("/cook/profile");
 
   // Today's orders
   const today = new Date().toISOString().split("T")[0];
@@ -68,7 +68,7 @@ export default async function CookDashboardPage() {
               <Star className="h-4 w-4" />
               <span className="text-xs">Рейтинг</span>
             </div>
-            <p className="text-2xl font-bold">{cookProfile.avg_rating || "—"}</p>
+            <p className="text-2xl font-bold">{cookProfile.avg_rating || "–"}</p>
           </CardContent>
         </Card>
         <Card>
