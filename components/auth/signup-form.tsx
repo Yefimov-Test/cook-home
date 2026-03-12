@@ -5,13 +5,6 @@ import { signup } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
@@ -81,43 +74,42 @@ export function SignupForm({ cities }: { cities: City[] }) {
       </div>
 
       <div className="space-y-2">
-        <Label>Город</Label>
-        <input type="hidden" name="city_id" value={cityId} />
-        <Select value={cityId} onValueChange={(v) => setCityId(v ?? "")}>
-          <SelectTrigger>
-            <SelectValue placeholder="Выберите город" />
-          </SelectTrigger>
-          <SelectContent>
-            {cities.map((city) => (
-              <SelectItem key={city.id} value={city.id} label={city.name}>
-                {city.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label htmlFor="city_id">Город</Label>
+        <select
+          id="city_id"
+          name="city_id"
+          value={cityId}
+          onChange={(e) => setCityId(e.target.value)}
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+        >
+          <option value="">Выберите город</option>
+          {cities.map((city) => (
+            <option key={city.id} value={city.id}>
+              {city.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <div className="space-y-2">
-        <Label>Район</Label>
-        <input type="hidden" name="district_id" value={districtId} />
-        <Select
+        <Label htmlFor="district_id">Район</Label>
+        <select
+          id="district_id"
+          name="district_id"
           value={districtId}
-          onValueChange={(v) => setDistrictId(v ?? "")}
+          onChange={(e) => setDistrictId(e.target.value)}
           disabled={!cityId}
+          className="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-xs transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
         >
-          <SelectTrigger>
-            <SelectValue
-              placeholder={cityId ? "Выберите район" : "Сначала выберите город"}
-            />
-          </SelectTrigger>
-          <SelectContent>
-            {districts.map((d) => (
-              <SelectItem key={d.id} value={d.id} label={d.name}>
-                {d.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+          <option value="">
+            {cityId ? "Выберите район" : "Сначала выберите город"}
+          </option>
+          {districts.map((d) => (
+            <option key={d.id} value={d.id}>
+              {d.name}
+            </option>
+          ))}
+        </select>
       </div>
 
       <Button type="submit" className="w-full" disabled={pending}>
