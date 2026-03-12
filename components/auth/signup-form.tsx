@@ -89,7 +89,7 @@ export function SignupForm({ cities }: { cities: City[] }) {
           </SelectTrigger>
           <SelectContent>
             {cities.map((city) => (
-              <SelectItem key={city.id} value={city.id}>
+              <SelectItem key={city.id} value={city.id} label={city.name}>
                 {city.name}
               </SelectItem>
             ))}
@@ -112,7 +112,7 @@ export function SignupForm({ cities }: { cities: City[] }) {
           </SelectTrigger>
           <SelectContent>
             {districts.map((d) => (
-              <SelectItem key={d.id} value={d.id}>
+              <SelectItem key={d.id} value={d.id} label={d.name}>
                 {d.name}
               </SelectItem>
             ))}

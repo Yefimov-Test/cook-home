@@ -110,7 +110,7 @@ export function Filters({ cities }: FiltersProps) {
         </SelectTrigger>
         <SelectContent>
           {cities.map((city) => (
-            <SelectItem key={city.id} value={city.id}>
+            <SelectItem key={city.id} value={city.id} label={city.name}>
               {city.name}
             </SelectItem>
           ))}
@@ -129,7 +129,7 @@ export function Filters({ cities }: FiltersProps) {
           </SelectTrigger>
           <SelectContent>
             {districts.map((district) => (
-              <SelectItem key={district.id} value={district.id}>
+              <SelectItem key={district.id} value={district.id} label={district.name}>
                 {district.name}
               </SelectItem>
             ))}
