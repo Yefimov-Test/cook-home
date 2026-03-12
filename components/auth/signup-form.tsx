@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect, useTransition } from "react";
-import { signup } from "@/actions/auth";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,7 +24,7 @@ export function SignupForm({ cities }: { cities: City[] }) {
   const [districtId, setDistrictId] = useState("");
   const [districts, setDistricts] = useState<District[]>([]);
   const [error, setError] = useState("");
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setIsPending] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -47,20 +46,40 @@ export function SignupForm({ cities }: { cities: City[] }) {
       });
   }, [cityId]);
 
-  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setError("");
+    setIsPending(true);
 
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const body = {
+      full_name: (form.elements.namedItem("full_name") as HTMLInputElement).value,
+      email: (form.elements.namedItem("email") as HTMLInputElement).value,
+      password: (form.elements.namedItem("password") as HTMLInputElement).value,
+      city_id: cityId,
+      district_id: districtId,
+    };
 
-    startTransition(async () => {
-      const result = await signup(null, formData);
-      if (result?.error) {
-        setError(result.error);
-      } else {
-        router.push("/");
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        setError(data.error || "Ошибка регистрации");
+        setIsPending(false);
+        return;
       }
-    });
+
+      router.push("/");
+    } catch {
+      setError("Ошибка сети");
+      setIsPending(false);
+    }
   }
 
   return (
