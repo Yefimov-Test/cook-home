@@ -5,7 +5,10 @@ import { loginSchema, signupSchema } from "@/lib/validations/auth";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 
-export async function signup(formData: FormData) {
+export async function signup(
+  _prev: { error?: string } | null,
+  formData: FormData
+) {
   const raw = {
     email: formData.get("email"),
     password: formData.get("password"),
@@ -40,7 +43,7 @@ export async function signup(formData: FormData) {
       .update({
         full_name: parsed.data.full_name,
         city_id: parsed.data.city_id,
-        district_id: parsed.data.district_id,
+        district_id: parsed.data.district_id || null,
       })
       .eq("id", data.user.id);
   }

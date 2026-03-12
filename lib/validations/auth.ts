@@ -10,7 +10,7 @@ export const signupSchema = z.object({
   password: z.string().min(6, "Минимум 6 символов"),
   full_name: z.string().min(2, "Введите имя"),
   city_id: z.string().uuid("Выберите город"),
-  district_id: z.string().uuid("Выберите район"),
+  district_id: z.string().uuid("Выберите район").or(z.literal("")),
 });
 
 export type LoginInput = z.infer<typeof loginSchema>;

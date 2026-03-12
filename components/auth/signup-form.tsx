@@ -43,12 +43,7 @@ export function SignupForm({ cities }: { cities: City[] }) {
       });
   }, [cityId]);
 
-  const [state, formAction, pending] = useActionState(
-    async (_prev: { error?: string } | null, formData: FormData) => {
-      return await signup(formData);
-    },
-    null
-  );
+  const [state, formAction, pending] = useActionState(signup, null);
 
   return (
     <form action={formAction} className="space-y-4">
